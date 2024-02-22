@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.hamcrest:hamcrest-core:1.3'
+}
+
+task cleanBuild(type: Delete) {
+    delete 'src/main/java/build'
+    mkdir 'src/main/java/build'
+}
+
+task compile(type: JavaCompile) {
+    sourceSets.main.java.srcDirs = ['src/main/java']
+    sourceSets.test.java.srcDirs = ['src/test/java']
+    classpath = sourceSets.main.runtimeClasspath
+    options.compilerArgs += ['-d', 'src/main/java/build']
+}
+
+task testBuild(type: Test, dependsOn: 'compile') {
+    useJUnit()
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+}
+
+task runBuild(type: JavaExec, dependsOn: 'compile') {
+    main = 'RunEdgeConvert'
+    classpath = sourceSets.main.runtimeClasspath
+}
+//use this if you want to run everything at once
+task buildAndRun(dependsOn: ['cleanBuild', 'compile', 'testBuild', 'runBuild'])
